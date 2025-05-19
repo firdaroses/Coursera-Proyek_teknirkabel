@@ -1,21 +1,673 @@
-x
-B
-A
-B
-C
-C
-C
-D
-D
-A
-A
-D
-A
-B
-A
-E
-A
-A
-B
-B
-B
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "-5jgA3_Vwr8-"
+   },
+   "source": [
+    "Firda Rosela Sundari\n",
+    "\n",
+    "2200198\n",
+    "\n",
+    "19/05/2025\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "uU5kIH5lvyCO"
+   },
+   "source": [
+    "# Pendahuluan\n",
+    "\n",
+    "Tujuan dari proyek ini adalah untuk mengukur seberapa baik peserta melakukan latihan mengangkat barbel dan untuk mengklasifikasikan data yang dibaca dari akselerometer ke dalam 5 kelas yang berbeda (Kelas A sampai Kelas E).\n",
+    "\n",
+    "Silakan merujuk ke tautan di bawah ini untuk sumber data:\n",
+    "\n",
+    "*   http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har\n",
+    "*   https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv\n",
+    "*   https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "3O6W2CR3xTKw"
+   },
+   "source": [
+    "# Install packages"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "EQ2_Mtz-yAr9"
+   },
+   "source": [
+    "i used google colab to train and test, so we have to install the packages R first before we use the library"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/"
+    },
+    "id": "pXrNjHtJvRTl",
+    "outputId": "79e02012-a95b-4454-d3b9-187e33752d2d"
+   },
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "Installing package into ‘/usr/local/lib/R/site-library’\n",
+      "(as ‘lib’ is unspecified)\n",
+      "\n",
+      "Installing package into ‘/usr/local/lib/R/site-library’\n",
+      "(as ‘lib’ is unspecified)\n",
+      "\n",
+      "Installing package into ‘/usr/local/lib/R/site-library’\n",
+      "(as ‘lib’ is unspecified)\n",
+      "\n",
+      "Installing package into ‘/usr/local/lib/R/site-library’\n",
+      "(as ‘lib’ is unspecified)\n",
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "install.packages(\"caret\", repos = \"http://cran.us.r-project.org\")\n",
+    "install.packages(\"randomForest\", repos = \"http://cran.us.r-project.org\")\n",
+    "install.packages(\"ggplot2\", repos = \"http://cran.us.r-project.org\")\n",
+    "install.packages(\"dplyr\", repos = \"http://cran.us.r-project.org\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "IoddbEGNy3RQ"
+   },
+   "source": [
+    "# Import Library"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "metadata": {
+    "id": "H_kwM7Ify7oX"
+   },
+   "outputs": [],
+   "source": [
+    "library(caret)\n",
+    "library(randomForest)\n",
+    "library(dplyr)\n",
+    "library(ggplot2)\n",
+    "library(e1071)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "FN9-VASQz9N4"
+   },
+   "source": [
+    "# Install dan muat datasets"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "metadata": {
+    "id": "mKkGAveLzzsW"
+   },
+   "outputs": [],
+   "source": [
+    "download.file(\"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv\", destfile = \"pml-training.csv\")\n",
+    "download.file(\"https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv\", destfile = \"pml-testing.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "metadata": {
+    "id": "cKrMdNqE0d5t"
+   },
+   "outputs": [],
+   "source": [
+    "training_raw <- read.csv(\"/content/pml-training.csv\", na.strings=c(\"NA\", \"\", \"#DIV/0!\"))\n",
+    "testing_raw <- read.csv(\"/content/pml-testing.csv\", na.strings=c(\"NA\", \"\", \"#DIV/0!\"))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "aKS8rdUazzXe"
+   },
+   "source": []
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "kFWq3Dup0uUC"
+   },
+   "source": [
+    "# Pembersihan data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "metadata": {
+    "id": "MxpEVHqU0rrD"
+   },
+   "outputs": [],
+   "source": [
+    "# Hapus kolom dengan banyak NA\n",
+    "training <- training_raw[, colSums(is.na(training_raw)) == 0]\n",
+    "\n",
+    "# Hapus kolom non-predictor (user info, timestamps, dll)\n",
+    "training <- training[, -(1:7)]\n",
+    "\n",
+    "# Buat partisi training dan validasi\n",
+    "set.seed(123)\n",
+    "inTrain <- createDataPartition(training$classe, p=0.7, list=FALSE)\n",
+    "trainData <- training[inTrain, ]\n",
+    "validData <- training[-inTrain, ]"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "P3MKrxQn2MVT"
+   },
+   "source": [
+    "# Pembuatan 3 model berbeda"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "metadata": {
+    "id": "7rU1gHZD1gGG"
+   },
+   "outputs": [],
+   "source": [
+    "# random forest\n",
+    "set.seed(100)\n",
+    "model_rf <- train(classe ~ ., data=trainData, method=\"rf\", trControl=trainControl(method=\"cv\", number=5), ntree=100)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {
+    "id": "8Mpfqlby2D_3"
+   },
+   "outputs": [],
+   "source": [
+    "# Model LDA\n",
+    "set.seed(200)\n",
+    "model_lda <- train(\n",
+    "  classe ~ .,\n",
+    "  data = trainData,\n",
+    "  method = \"lda\",\n",
+    "  trControl = trainControl(method = \"cv\", number = 5)\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "metadata": {
+    "id": "BVHxwCOp2wjZ"
+   },
+   "outputs": [],
+   "source": [
+    "# Model Decision Tree\n",
+    "\n",
+    "set.seed(300)\n",
+    "model_rpart <- train(\n",
+    "  classe ~ .,\n",
+    "  data = trainData,\n",
+    "  method = \"rpart\",\n",
+    "  trControl = trainControl(method = \"cv\", number = 5)\n",
+    ")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "YIl24E6KFYgM"
+   },
+   "source": [
+    "# Conclusion"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {
+    "id": "0FgHAYP7GK-J"
+   },
+   "source": [
+    "pada percobaan tiga model ini, confusion matrix dan statistics tidak bisa ditampilkan. oleh karena itu, hasil belum bisa disimpulkan mana yang paling bagus diantara 3 model ini"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 69
+    },
+    "id": "swdOE_u3_wqG",
+    "outputId": "4f5ae2b3-5a8e-4c75-e586-5967cf337922"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<style>\n",
+       ".list-inline {list-style: none; margin:0; padding: 0}\n",
+       ".list-inline>li {display: inline-block}\n",
+       ".list-inline>li:not(:last-child)::after {content: \"\\00b7\"; padding: 0 .5ex}\n",
+       "</style>\n",
+       "<ol class=list-inline><li>B</li><li>A</li><li>B</li><li>A</li><li>A</li><li>E</li><li>D</li><li>B</li><li>A</li><li>A</li><li>B</li><li>C</li><li>B</li><li>A</li><li>E</li><li>E</li><li>A</li><li>B</li><li>B</li><li>B</li></ol>\n",
+       "\n",
+       "<details>\n",
+       "\t<summary style=display:list-item;cursor:pointer>\n",
+       "\t\t<strong>Levels</strong>:\n",
+       "\t</summary>\n",
+       "\t<style>\n",
+       "\t.list-inline {list-style: none; margin:0; padding: 0}\n",
+       "\t.list-inline>li {display: inline-block}\n",
+       "\t.list-inline>li:not(:last-child)::after {content: \"\\00b7\"; padding: 0 .5ex}\n",
+       "\t</style>\n",
+       "\t<ol class=list-inline><li>'A'</li><li>'B'</li><li>'C'</li><li>'D'</li><li>'E'</li></ol>\n",
+       "</details>"
+      ],
+      "text/latex": [
+       "\\begin{enumerate*}\n",
+       "\\item B\n",
+       "\\item A\n",
+       "\\item B\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item E\n",
+       "\\item D\n",
+       "\\item B\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item B\n",
+       "\\item C\n",
+       "\\item B\n",
+       "\\item A\n",
+       "\\item E\n",
+       "\\item E\n",
+       "\\item A\n",
+       "\\item B\n",
+       "\\item B\n",
+       "\\item B\n",
+       "\\end{enumerate*}\n",
+       "\n",
+       "\\emph{Levels}: \\begin{enumerate*}\n",
+       "\\item 'A'\n",
+       "\\item 'B'\n",
+       "\\item 'C'\n",
+       "\\item 'D'\n",
+       "\\item 'E'\n",
+       "\\end{enumerate*}\n"
+      ],
+      "text/markdown": [
+       "1. B\n",
+       "2. A\n",
+       "3. B\n",
+       "4. A\n",
+       "5. A\n",
+       "6. E\n",
+       "7. D\n",
+       "8. B\n",
+       "9. A\n",
+       "10. A\n",
+       "11. B\n",
+       "12. C\n",
+       "13. B\n",
+       "14. A\n",
+       "15. E\n",
+       "16. E\n",
+       "17. A\n",
+       "18. B\n",
+       "19. B\n",
+       "20. B\n",
+       "\n",
+       "\n",
+       "\n",
+       "**Levels**: 1. 'A'\n",
+       "2. 'B'\n",
+       "3. 'C'\n",
+       "4. 'D'\n",
+       "5. 'E'\n",
+       "\n",
+       "\n"
+      ],
+      "text/plain": [
+       " [1] B A B A A E D B A A B C B A E E A B B B\n",
+       "Levels: A B C D E"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Samakan kolom dengan training\n",
+    "test <- testing_raw[, names(testing_raw) %in% names(trainData)]\n",
+    "\n",
+    "# Prediksi\n",
+    "pred_final <- predict(model_rf, newdata=test)\n",
+    "\n",
+    "# Tampilkan hasil\n",
+    "pred_final"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 69
+    },
+    "id": "KyfcDYzZDSAZ",
+    "outputId": "446667b4-1dea-49c1-cfa6-1888c192cd89"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<style>\n",
+       ".list-inline {list-style: none; margin:0; padding: 0}\n",
+       ".list-inline>li {display: inline-block}\n",
+       ".list-inline>li:not(:last-child)::after {content: \"\\00b7\"; padding: 0 .5ex}\n",
+       "</style>\n",
+       "<ol class=list-inline><li>C</li><li>A</li><li>A</li><li>A</li><li>A</li><li>C</li><li>C</li><li>A</li><li>A</li><li>A</li><li>C</li><li>C</li><li>C</li><li>A</li><li>C</li><li>A</li><li>A</li><li>A</li><li>A</li><li>C</li></ol>\n",
+       "\n",
+       "<details>\n",
+       "\t<summary style=display:list-item;cursor:pointer>\n",
+       "\t\t<strong>Levels</strong>:\n",
+       "\t</summary>\n",
+       "\t<style>\n",
+       "\t.list-inline {list-style: none; margin:0; padding: 0}\n",
+       "\t.list-inline>li {display: inline-block}\n",
+       "\t.list-inline>li:not(:last-child)::after {content: \"\\00b7\"; padding: 0 .5ex}\n",
+       "\t</style>\n",
+       "\t<ol class=list-inline><li>'A'</li><li>'B'</li><li>'C'</li><li>'D'</li><li>'E'</li></ol>\n",
+       "</details>"
+      ],
+      "text/latex": [
+       "\\begin{enumerate*}\n",
+       "\\item C\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item C\n",
+       "\\item C\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item C\n",
+       "\\item C\n",
+       "\\item C\n",
+       "\\item A\n",
+       "\\item C\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item C\n",
+       "\\end{enumerate*}\n",
+       "\n",
+       "\\emph{Levels}: \\begin{enumerate*}\n",
+       "\\item 'A'\n",
+       "\\item 'B'\n",
+       "\\item 'C'\n",
+       "\\item 'D'\n",
+       "\\item 'E'\n",
+       "\\end{enumerate*}\n"
+      ],
+      "text/markdown": [
+       "1. C\n",
+       "2. A\n",
+       "3. A\n",
+       "4. A\n",
+       "5. A\n",
+       "6. C\n",
+       "7. C\n",
+       "8. A\n",
+       "9. A\n",
+       "10. A\n",
+       "11. C\n",
+       "12. C\n",
+       "13. C\n",
+       "14. A\n",
+       "15. C\n",
+       "16. A\n",
+       "17. A\n",
+       "18. A\n",
+       "19. A\n",
+       "20. C\n",
+       "\n",
+       "\n",
+       "\n",
+       "**Levels**: 1. 'A'\n",
+       "2. 'B'\n",
+       "3. 'C'\n",
+       "4. 'D'\n",
+       "5. 'E'\n",
+       "\n",
+       "\n"
+      ],
+      "text/plain": [
+       " [1] C A A A A C C A A A C C C A C A A A A C\n",
+       "Levels: A B C D E"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Samakan kolom dengan training\n",
+    "test <- testing_raw[, names(testing_raw) %in% names(trainData)]\n",
+    "\n",
+    "# Prediksi\n",
+    "pred_final <- predict(model_rpart, newdata=test)\n",
+    "\n",
+    "# Tampilkan hasil\n",
+    "pred_final"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "metadata": {
+    "colab": {
+     "base_uri": "https://localhost:8080/",
+     "height": 69
+    },
+    "id": "bLiOaNZCDbs0",
+    "outputId": "44e22fcc-9f76-4414-c696-de8d9d0335ae"
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<style>\n",
+       ".list-inline {list-style: none; margin:0; padding: 0}\n",
+       ".list-inline>li {display: inline-block}\n",
+       ".list-inline>li:not(:last-child)::after {content: \"\\00b7\"; padding: 0 .5ex}\n",
+       "</style>\n",
+       "<ol class=list-inline><li>B</li><li>A</li><li>B</li><li>C</li><li>C</li><li>C</li><li>D</li><li>D</li><li>A</li><li>A</li><li>D</li><li>A</li><li>B</li><li>A</li><li>E</li><li>A</li><li>A</li><li>B</li><li>B</li><li>B</li></ol>\n",
+       "\n",
+       "<details>\n",
+       "\t<summary style=display:list-item;cursor:pointer>\n",
+       "\t\t<strong>Levels</strong>:\n",
+       "\t</summary>\n",
+       "\t<style>\n",
+       "\t.list-inline {list-style: none; margin:0; padding: 0}\n",
+       "\t.list-inline>li {display: inline-block}\n",
+       "\t.list-inline>li:not(:last-child)::after {content: \"\\00b7\"; padding: 0 .5ex}\n",
+       "\t</style>\n",
+       "\t<ol class=list-inline><li>'A'</li><li>'B'</li><li>'C'</li><li>'D'</li><li>'E'</li></ol>\n",
+       "</details>"
+      ],
+      "text/latex": [
+       "\\begin{enumerate*}\n",
+       "\\item B\n",
+       "\\item A\n",
+       "\\item B\n",
+       "\\item C\n",
+       "\\item C\n",
+       "\\item C\n",
+       "\\item D\n",
+       "\\item D\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item D\n",
+       "\\item A\n",
+       "\\item B\n",
+       "\\item A\n",
+       "\\item E\n",
+       "\\item A\n",
+       "\\item A\n",
+       "\\item B\n",
+       "\\item B\n",
+       "\\item B\n",
+       "\\end{enumerate*}\n",
+       "\n",
+       "\\emph{Levels}: \\begin{enumerate*}\n",
+       "\\item 'A'\n",
+       "\\item 'B'\n",
+       "\\item 'C'\n",
+       "\\item 'D'\n",
+       "\\item 'E'\n",
+       "\\end{enumerate*}\n"
+      ],
+      "text/markdown": [
+       "1. B\n",
+       "2. A\n",
+       "3. B\n",
+       "4. C\n",
+       "5. C\n",
+       "6. C\n",
+       "7. D\n",
+       "8. D\n",
+       "9. A\n",
+       "10. A\n",
+       "11. D\n",
+       "12. A\n",
+       "13. B\n",
+       "14. A\n",
+       "15. E\n",
+       "16. A\n",
+       "17. A\n",
+       "18. B\n",
+       "19. B\n",
+       "20. B\n",
+       "\n",
+       "\n",
+       "\n",
+       "**Levels**: 1. 'A'\n",
+       "2. 'B'\n",
+       "3. 'C'\n",
+       "4. 'D'\n",
+       "5. 'E'\n",
+       "\n",
+       "\n"
+      ],
+      "text/plain": [
+       " [1] B A B C C C D D A A D A B A E A A B B B\n",
+       "Levels: A B C D E"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "# Samakan kolom dengan training\n",
+    "test <- testing_raw[, names(testing_raw) %in% names(trainData)]\n",
+    "\n",
+    "# Prediksi\n",
+    "pred_final <- predict(model_lda, newdata=test)\n",
+    "\n",
+    "# Tampilkan hasil\n",
+    "pred_final"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "metadata": {
+    "id": "vrnIw_GPH0L0"
+   },
+   "outputs": [],
+   "source": [
+    "write.table(pred_final, file=\"Prediction_Assignment.html\", row.names=FALSE, quote=FALSE)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 66,
+   "metadata": {
+    "id": "6KVrQenrINLC"
+   },
+   "outputs": [],
+   "source": [
+    "write.table(pred_final, file=\"Prediction_Assignment.Rmd\", row.names=FALSE, quote=FALSE)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "id": "LuzVp36qL9uN"
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "colab": {
+   "provenance": []
+  },
+  "kernelspec": {
+   "display_name": "R",
+   "name": "ir"
+  },
+  "language_info": {
+   "name": "R"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
