@@ -1,0 +1,108 @@
+---
+title: "prediction_assignment"
+author: "Firda Rosela Sundari"
+date: "2025-05-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Pendahuluan
+
+Tujuan dari proyek ini adalah untuk mengukur seberapa baik peserta melakukan latihan mengangkat barbel dan untuk mengklasifikasikan data yang dibaca dari akselerometer ke dalam 5 kelas yang berbeda (Kelas A sampai Kelas E).
+
+Silakan merujuk ke tautan di bawah ini untuk sumber data:
+
+<http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har>
+
+<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv>
+
+<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv>
+
+## install/load packages yang butuhkan untuk membuat model
+
+```{r}
+library(caret)
+library(rpart)
+library(randomForest)
+```
+
+## load training dan testing datasets
+
+```{r}
+train <- read.csv("E:/Rapps/datasets/pml-training.csv", na.strings=c("NA", "#DIV/0!", ""))
+test <- read.csv("E:/Rapps/datasets/pml-testing.csv", na.strings=c("NA", "#DIV/0!", ""))
+```
+
+## Hapus kolom-kolom yang bernilai kosong (null) dan 7 kolom pertama yang tidak akan digunakan.
+
+```{r}
+test_clean <- names(test[,colSums(is.na(test)) == 0]) [8:59]
+clean_train<-train[,c(test_clean,"classe")]
+clean_test<-test[,c(test_clean,"problem_id")]
+```
+
+## Periksa dimensi dari data test dan train yang sudah dibersihkan.
+
+```{r}
+dim(clean_test)
+dim(clean_train)
+```
+
+## Bagi data menjadi dataset pelatihan (training) dan dataset pengujian (testing).
+
+```{r}
+set.seed(100)
+inTrain<-createDataPartition(clean_train$classe, p=0.7, list=FALSE)
+training<-clean_train[inTrain,]
+testing<-clean_train[-inTrain,]
+dim(training)
+dim(testing)
+```
+
+#### MODEL RANDOM FOREST
+
+```{r}
+model_rf<-randomForest(as.factor(classe)~ ., data=training, ntree=500)
+
+set.seed(300)
+predict<-predict(model_rf, testing, type ="class")
+confusionMatrix(predict,as.factor(testing$classe))
+```
+
+Model Random Forest memberikan akurasi sebesar 99,6% pada data pengujian, dengan perkiraan error di luar sampel (out of sample error) sekitar 0,4%.
+
+#### MODEL LDA
+
+```{r}
+model_lda<-train(classe~ ., data=training, method="lda")
+
+set.seed(200)
+predict<-predict(model_lda,testing)
+confusionMatrix(predict,as.factor(testing$classe))
+```
+
+Model LDA memberikan akurasi sebesar 70% pada data pengujian, dengan perkiraan error di luar sampel (out of sample error) sekitar 30%.
+
+#### MODEL DECISSION TREE
+
+```{r}
+model_detree<-rpart(classe~ ., data=training,method="class")
+
+set.seed(300)
+predict<-predict(model_detree,testing,type="class")
+confusionMatrix(predict,as.factor(testing$classe))
+```
+
+Model Decision Tree memberikan akurasi sebesar 74% pada data pengujian, dengan perkiraan error di luar sampel (out of sample error) sekitar 26%.
+
+## Kesimpulan
+
+Dari ketiga model diatas dapat disimpulkan bahwa Model Random Forest memberikan akaaurasi terbaik, yaitu mencapai 99.6%. Karena itu, model ini dipilih untuk melakukan prediksi performa latihan pada 20 peserta.
+
+```{r}
+predict<-predict(model_rf, clean_test, type ="class")
+predict
+```
