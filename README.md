@@ -1,140 +1,109 @@
-Firda Rosela Sundari
+---
+title: "prediction_assignment"
+author: "Firda Rosela Sundari"
+date: "2025-05-28"
+output: html_document
+---
 
-2200198
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
 
-19/05/2025
+## Pendahuluan
 
-Pendahuluan
 Tujuan dari proyek ini adalah untuk mengukur seberapa baik peserta melakukan latihan mengangkat barbel dan untuk mengklasifikasikan data yang dibaca dari akselerometer ke dalam 5 kelas yang berbeda (Kelas A sampai Kelas E).
 
 Silakan merujuk ke tautan di bawah ini untuk sumber data:
 
-http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har
-https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
-https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv
-Install packages
-i used google colab to train and test, so we have to install the packages R first before we use the library
+<http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har>
 
+<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv>
 
-[48]
-1m
-install.packages("caret", repos = "http://cran.us.r-project.org")
-install.packages("randomForest", repos = "http://cran.us.r-project.org")
-install.packages("ggplot2", repos = "http://cran.us.r-project.org")
-install.packages("dplyr", repos = "http://cran.us.r-project.org")
-Installing package into ‘/usr/local/lib/R/site-library’
-(as ‘lib’ is unspecified)
+<https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv>
 
-Installing package into ‘/usr/local/lib/R/site-library’
-(as ‘lib’ is unspecified)
+## install/load packages yang butuhkan untuk membuat model
 
-Installing package into ‘/usr/local/lib/R/site-library’
-(as ‘lib’ is unspecified)
-
-Installing package into ‘/usr/local/lib/R/site-library’
-(as ‘lib’ is unspecified)
-
-Import Library
-
-[49]
-0s
+```{r}
 library(caret)
+library(rpart)
 library(randomForest)
-library(dplyr)
-library(ggplot2)
-library(e1071)
-Install dan muat datasets
+```
 
-[50]
-0s
-download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv", destfile = "pml-training.csv")
-download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv", destfile = "pml-testing.csv")
+## load training dan testing datasets
 
-[51]
-0s
-training_raw <- read.csv("/content/pml-training.csv", na.strings=c("NA", "", "#DIV/0!"))
-testing_raw <- read.csv("/content/pml-testing.csv", na.strings=c("NA", "", "#DIV/0!"))
-Double-click (or enter) to edit
+```{r}
+train <- read.csv("E:/Rapps/datasets/pml-training.csv", na.strings=c("NA", "#DIV/0!", ""))
+test <- read.csv("E:/Rapps/datasets/pml-testing.csv", na.strings=c("NA", "#DIV/0!", ""))
+```
 
-Pembersihan data
+## Hapus kolom-kolom yang bernilai kosong (null) dan 7 kolom pertama yang tidak akan digunakan.
 
-[54]
-# Hapus kolom dengan banyak NA
-training <- training_raw[, colSums(is.na(training_raw)) == 0]
+```{r}
+test_clean <- names(test[,colSums(is.na(test)) == 0]) [8:59]
+clean_train<-train[,c(test_clean,"classe")]
+clean_test<-test[,c(test_clean,"problem_id")]
+```
 
-# Hapus kolom non-predictor (user info, timestamps, dll)
-training <- training[, -(1:7)]
+## Periksa dimensi dari data test dan train yang sudah dibersihkan.
 
-# Buat partisi training dan validasi
-set.seed(123)
-inTrain <- createDataPartition(training$classe, p=0.7, list=FALSE)
-trainData <- training[inTrain, ]
-validData <- training[-inTrain, ]
-Pembuatan 3 model berbeda
+```{r}
+dim(clean_test)
+dim(clean_train)
+```
 
-[21]
-2m
-# random forest
+## Bagi data menjadi dataset pelatihan (training) dan dataset pengujian (testing).
+
+```{r}
 set.seed(100)
-model_rf <- train(classe ~ ., data=trainData, method="rf", trControl=trainControl(method="cv", number=5), ntree=100)
+inTrain<-createDataPartition(clean_train$classe, p=0.7, list=FALSE)
+training<-clean_train[inTrain,]
+testing<-clean_train[-inTrain,]
+dim(training)
+dim(testing)
+```
 
+#### MODEL RANDOM FOREST
 
-[25]
-# Model LDA
-set.seed(200)
-model_lda <- train(
-  classe ~ ., 
-  data = trainData, 
-  method = "lda",
-  trControl = trainControl(method = "cv", number = 5)
-)
-
-[42]
-# Model Decision Tree
+```{r}
+model_rf<-randomForest(as.factor(classe)~ ., data=training, ntree=500)
 
 set.seed(300)
-model_rpart <- train(
-  classe ~ ., 
-  data = trainData, 
-  method = "rpart",
-  trControl = trainControl(method = "cv", number = 5)
-)
-Conclusion
-pada percobaan tiga model ini, confusion matrix dan statistics tidak bisa ditampilkan. oleh karena itu, hasil belum bisa disimpulkan mana yang paling bagus diantara 3 model ini
+predict<-predict(model_rf, testing, type ="class")
+confusionMatrix(predict,as.factor(testing$classe))
+```
 
+Model Random Forest memberikan akurasi sebesar 99,6% pada data pengujian, dengan perkiraan error di luar sampel (out of sample error) sekitar 0,4%.
 
-[56]
-0s
-# Samakan kolom dengan training
-test <- testing_raw[, names(testing_raw) %in% names(trainData)]
+#### MODEL LDA
 
-# Prediksi
-pred_final <- predict(model_rf, newdata=test)
+```{r}
+model_lda<-train(classe~ ., data=training, method="lda")
 
-# Tampilkan hasil
-pred_final
+set.seed(200)
+predict<-predict(model_lda,testing)
+confusionMatrix(predict,as.factor(testing$classe))
+```
 
+Model LDA memberikan akurasi sebesar 70% pada data pengujian, dengan perkiraan error di luar sampel (out of sample error) sekitar 30%.
 
-[57]
-0s
-# Samakan kolom dengan training
-test <- testing_raw[, names(testing_raw) %in% names(trainData)]
+#### MODEL DECISSION TREE
 
-# Prediksi
-pred_final <- predict(model_rpart, newdata=test)
+```{r}
+model_detree<-rpart(classe~ ., data=training,method="class")
 
-# Tampilkan hasil
-pred_final
+set.seed(300)
+predict<-predict(model_detree,testing,type="class")
+confusionMatrix(predict,as.factor(testing$classe))
+```
 
+Model Decision Tree memberikan akurasi sebesar 74% pada data pengujian, dengan perkiraan error di luar sampel (out of sample error) sekitar 26%.
 
-[63]
-0s
-# Samakan kolom dengan training
-test <- testing_raw[, names(testing_raw) %in% names(trainData)]
+## Kesimpulan
 
-# Prediksi
-pred_final <- predict(model_lda, newdata=test)
+Dari ketiga model diatas dapat disimpulkan bahwa Model Random Forest memberikan akaaurasi terbaik, yaitu mencapai 99.6%. Karena itu, model ini dipilih untuk melakukan prediksi performa latihan pada 20 peserta.
 
-# Tampilkan hasil
-pred_final
+```{r}
+predict<-predict(model_rf, clean_test, type ="class")
+predict
+```
 
